@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- CSS -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+
+    <!-- Fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Person Counter Project</title>
+  </head>
+  <body>
+    <header>
+      <i class="ph ph-user-circle-plus"></i>
+      <nav>
+        <ul class="nav__links">
+          <li><a href="/templates/index.html">Person Counter Project</a></li>
+          <li><a href="/">Statistics</a></li>
+        </ul>
+      </nav>
+      <a class="cta" href="#">Read Me</a>
+      <p class="menu cta">Menu</p>
+    </header>
+    <main>
+      <div class="container">
+        <div class="left-section">
+          <h1>Current Count</h1>
+          <div class="message-container">
+            <div class="message-item">
+              <span class="message-label">People Entered: </span>
+              <span id="inCount">0</span>
+            </div>
+            <div class="message-item">
+              <span class="message-label">People Left: </span>
+              <span id="outCount">0</span>
+            </div>
+            <div class="message-item">
+              <span class="message-label">People Inside: </span>
+              <span id="currentCount">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-section">
+          <h1>About our Project</h1>
+          <p>
+            This project was initiated to address the need for an automated
+            person counter in the Mediatheek, where individuals were previously
+            counted manually. Our solution leverages modern technology to
+            provide an accurate and efficient counting system. Without having to
+            do any manual counting.
+          </p>
+          <p>
+            We built this project using an Arduino UNO with WiFi capabilities, a
+            Raspberry Pi, and two infrared sensors. The sensors detect when
+            someone enters or exits the area, and the data is processed and
+            displayed on our website in real-time. With this data we are able to
+            see in real-time if there is any space to study in the Mediatheek
+          </p>
+          <p>
+            The entire setup is housed in a custom-made case, which we created
+            using a laser cutter. This project not only enhances the operational
+            efficiency of the Mediatheek but also serves as a practical example
+            of integrating technology to solve real-world problems.
+          </p>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p>Project for Artevelde Hogeschool for the course Internet of Things.</p>
+      <p>By Jens, Sander, Lukas.</p>
+      <p>&copy; 2024 Arduino Monitoring System. All rights reserved.</p>
+    </footer>
+
+    <div class="overlay">
+      <a class="close">&times;</a>
+      <div class="overlay__content">
+        <a href="/templates/index.html">Person Counter Project</a>
+        <a href="/">Projects</a>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='mobile.js') }}"></script>
+
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script>
+      const host = window.location.hostname; // Raspberry Pi IP address
+      const port = 9001; // MQTT Websockets port
+      const inCountSpan = document.getElementById("inCount");
+      const outCountSpan = document.getElementById("outCount");
+      const currentCountSpan = document.getElementById("currentCount");
+
+      // Function to update counts
+      function updateCounts(message) {
+        const counts = message.split(", ");
+        const inCount = parseInt(counts[0].split(": ")[1]);
+        const outCount = parseInt(counts[1].split(": ")[1]);
+        const currentCount = parseInt(counts[2].split(": ")[1]);
+
+        inCountSpan.textContent = inCount;
+        outCountSpan.textContent = outCount;
+        currentCountSpan.textContent = currentCount;
+      }
+
+      // Fetch initial counts from the server
+      fetch("/api/data")
+        .then((response) => response.json())
+        .then((data) => {
+          updateCounts(
+            `people_entered: ${data.people_entered}, people_left: ${data.people_left}, current_count: ${data.current_count}`
+          );
+        });
+
+      // MQTT setup
+      const client = mqtt.connect(`mqtt:${host}:${port}`);
+
+      client.on("connect", () => {
+        client.subscribe("arduino/jannesiscool", (err) => {
+          if (!err) {
+            console.log("Subscribed to topic");
+          }
+        });
+      });
+
+      client.on("message", (topic, message) => {
+        updateCounts(message.toString());
+      });
+    </script>
+  </body>
+</html>

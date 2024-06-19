@@ -1,0 +1,26 @@
+{
+  "name": "person-counter-project",
+  "version": "1.0.0",
+  "description": "Person counter project using Arduino and Flask with MQTT",
+  "main": "index.html",
+  "scripts": {
+    "start": "flask run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kavakein/person-counter-project.git"
+  },
+  "keywords": [],
+  "author": "Jens, Sander, Lukas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kavakein/person-counter-project/issues"
+  },
+  "homepage": "https://github.com/Kavakein/person-counter-project#readme",
+  "devDependencies": {
+    "serve": "^11.2.0"
+  },
+  "dependencies": {
+    "mqtt": "^4.2.8"
+  }
+}
